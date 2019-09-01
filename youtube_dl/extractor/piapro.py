@@ -427,6 +427,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 			'url': 'http://piapro.jp/a/content/?id=qj6lvuictzc8lp1q',
 		},
 	]
+	# TODO: https://piapro.jp/t/x1z6 has lyrics
 
 	is_logged_in = None
 
@@ -734,6 +735,4 @@ class PiaproIE(PiaproBaseInfoExtractor):
 				'entries': entries,
 				'id': content_id,
 			}
-		from pprint import pprint
-		pprint(media_data)
 		return media_data
