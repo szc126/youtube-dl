@@ -142,7 +142,16 @@ class PiaproIE(PiaproBaseInfoExtractor):
 				'ext': 'mp3',
 				'alt_title': 'hqfe875u1o1al9br',
 				'display_id': 'LWnC',
-				'thumbnails': list, # freely editable by users
+				'thumbnails': [ # freely editable by users
+					{
+						'id': 'yyolktkwb1j3ygre_20080223162956',
+						'url': 'https://cdn.piapro.jp/thumb_i/yy/yyolktkwb1j3ygre_20080223162956_0740_0500.jpg',
+					},
+					{
+						'id': 'maobv87r1xkeyjtg_20100314003053',
+						'url': 'https://cdn.piapro.jp/thumb_i/ma/maobv87r1xkeyjtg_20100314003053_0740_0500.jpg',
+					},
+				],
 				'description': 'md5:d7b5eeebdb2063defce3619030e895bd',
 				'uploader': 'halyosy',
 				'license': '非営利目的に限ります\n作者の氏名を表示して下さい',
@@ -156,7 +165,9 @@ class PiaproIE(PiaproBaseInfoExtractor):
 				'comment_count': int,
 				'webpage_url': 'https://piapro.jp/t/LWnC',
 				'categories': ['オンガク', '音楽'],
-				'tags': list, # freely editable by users
+				'tags': [ # freely editable by users
+					'初音ミク', '桜ノ雨', 'ｈａｌｙｏｓｙ', '卒業',
+					'卒業ソング', '桜', '春', '思い出', '前向き', '名曲'],
 			},
 			'params': {
 				#'skip_download': True,
@@ -603,30 +614,24 @@ class PiaproIE(PiaproBaseInfoExtractor):
 			tags.pop()
 
 		thumbnails = []
-		if 'オンガク' in categories:
-			if 'card-chara-empty' in webpage:
-				thumbnails = [
-					{
-						'url': twitter_thumbnail_url,
-					}
-				]
-			else:
-				mobj = re.findall(
-					r'<img id="bigJacket_1" src="([^"]+)"',
-					webpage)
-				if mobj is not None:
-					for url in mobj:
-						thumbnail_id = self._search_regex(
-							r'[a-z0-9]{16}',
-							url,
-							'thumbnail_id',
-							fatal = False)
-						thumbnails.append(
-							{
-								'id': thumbnail_id,
-								'url': url,
-							}
-						)
+		if 'bigJacket' in webpage:
+			mobj = re.findall(
+				r'id="bigJacket_\d+" src="([^"]+)"',
+				webpage)
+			if mobj is not None:
+				for url in mobj:
+					print(url)
+					thumbnail_id = self._search_regex(
+						r'([a-z0-9]{16}_[0-9]{14})',
+						url,
+						'thumbnail_id',
+						fatal = False)
+					thumbnails.append(
+						{
+							'id': thumbnail_id,
+							'url': url,
+						}
+					)
 		else:
 			thumbnails = [
 				{
