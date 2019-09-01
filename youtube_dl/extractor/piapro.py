@@ -144,12 +144,12 @@ class PiaproIE(PiaproBaseInfoExtractor):
 				'display_id': 'LWnC',
 				'thumbnails': [ # freely editable by users
 					{
-						'id': 'yyolktkwb1j3ygre_20080223162956',
-						'url': 'https://cdn.piapro.jp/thumb_i/yy/yyolktkwb1j3ygre_20080223162956_0740_0500.jpg',
-					},
-					{
 						'id': 'maobv87r1xkeyjtg_20100314003053',
 						'url': 'https://cdn.piapro.jp/thumb_i/ma/maobv87r1xkeyjtg_20100314003053_0740_0500.jpg',
+					},
+					{
+						'id': 'yyolktkwb1j3ygre_20080223162956',
+						'url': 'https://cdn.piapro.jp/thumb_i/yy/yyolktkwb1j3ygre_20080223162956_0740_0500.jpg',
 					},
 				],
 				'description': 'md5:d7b5eeebdb2063defce3619030e895bd',
@@ -609,7 +609,8 @@ class PiaproIE(PiaproBaseInfoExtractor):
 			'tags',
 			flags = re.DOTALL,
 			fatal = False)
-		tags = re.split(r'\t+', tags)
+		tags = re.sub(r'\s+', ' ', tags)
+		tags = re.split(r' ', tags)
 		if tags[-1] == '[編集]':
 			tags.pop()
 
@@ -619,16 +620,16 @@ class PiaproIE(PiaproBaseInfoExtractor):
 				r'id="bigJacket_\d+" src="([^"]+)"',
 				webpage)
 			if mobj is not None:
-				for url in mobj:
+				for thumbnail_url in mobj:
 					thumbnail_id = self._search_regex(
 						r'([a-z0-9]{16}_[0-9]{14})',
-						url,
+						thumbnail_url,
 						'thumbnail_id',
 						fatal = False)
 					thumbnails.append(
 						{
 							'id': thumbnail_id,
-							'url': url,
+							'url': url_or_none('https:' + thumbnail_url),
 						}
 					)
 		else:
