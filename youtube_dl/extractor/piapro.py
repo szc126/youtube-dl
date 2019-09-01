@@ -85,8 +85,7 @@ class PiaproBaseInfoExtractor(InfoExtractor):
 
 		mobj = re.search(
 			r'>(.+)</a>',
-			text,
-		)
+			text)
 		cat_sub_name = mobj.group(1)
 
 		if '3dm' in text:
@@ -94,8 +93,7 @@ class PiaproBaseInfoExtractor(InfoExtractor):
 
 		mobj = re.search(
 			r'/([a-z0-9]+)/\?categoryId=(\d+)',
-			text,
-		)
+			text)
 		cat_id = mobj.group(1)
 		#cat_sub_id = mobj.group(2)
 		cat_name = self._MEDIA_TYPES_2[cat_id]
@@ -445,8 +443,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 		webpage = self._request_webpage(
 			'https://piapro.jp/login/',
 			None,
-			note = 'Preparing cookies',
-		)
+			note = 'Preparing cookies')
 
 		form_data = {
 			'_username': username,
@@ -456,8 +453,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 			'https://piapro.jp/login/exe',
 			None,
 			note = 'Logging in',
-			data = urlencode_postdata(form_data),
-		)
+			data = urlencode_postdata(form_data))
 		if response.url == 'https://piapro.jp/login/':
 			self._downloader.report_warning('Unable to log in')
 			return False
@@ -469,8 +465,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 			r'<span>カテゴリ：</span>(<a[^>]+>.+</a>)',
 			webpage,
 			'categories',
-			fatal = False,
-		)
+			fatal = False)
 		categories = self._convert_a_to_categories(categories)
 
 		content_id = None
@@ -481,8 +476,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 		if 'イラスト' in categories:
 			mobj = re.search(
 				r'(?P<content_id>[a-z0-9]{16})_(?P<create_date>[0-9]{14})',
-				twitter_thumbnail_url,
-			)
+				twitter_thumbnail_url)
 			if mobj is not None:
 				content_id = mobj.group('content_id')
 				create_date = mobj.group('create_date')
@@ -494,8 +488,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 				r'from:\'([A-Za-z0-9_-]{4})\'',
 			],
 			webpage,
-			'content_id_short',
-		)
+			'content_id_short')
 		if not content_id:
 			content_id = self._html_search_regex(
 				[
@@ -503,8 +496,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 					r'name="(?:DownloadOnly|DownloadWithBookmark)\[contentId\]"[^>]+value="([a-z0-9]{16})"',
 				],
 				webpage,
-				'content_id',
-			)
+				'content_id')
 		if not create_date:
 			create_date = self._html_search_regex(
 				[
@@ -512,27 +504,23 @@ class PiaproIE(PiaproBaseInfoExtractor):
 					r'name="(?:DownloadOnly|DownloadWithBookmark)\[createDate\]"[^>]+value="([0-9]{14})"',
 				],
 				webpage,
-				'create_date',
-			)
+				'create_date')
 
 		title = self._html_search_regex(
 			r'<h1[^>]+>(.+?)</h1>',
 			webpage,
-			'title',
-		)
+			'title')
 		description = self._search_regex(
 			r'<p class="cd_dtl_cap">(.+?)</p>',
 			webpage,
 			'description',
 			flags = re.DOTALL,
-			fatal = False,
-		)
+			fatal = False)
 		uploader_id = None
 		uploader = None
 		mobj = re.search(
 			r'<a class="cd_user-name" href="/(?P<uploader_id>[A-Za-z0-9_]+)">(?P<uploader>.+)さん</a>',
-			webpage,
-		)
+			webpage)
 		if mobj is not None:
 			uploader_id = mobj.group('uploader_id')
 			uploader = mobj.group('uploader')
@@ -542,12 +530,10 @@ class PiaproIE(PiaproBaseInfoExtractor):
 			webpage,
 			'license_terms',
 			flags = re.DOTALL,
-			fatal = False,
-		)
+			fatal = False)
 		mobj = re.findall(
 			r'([a-z]+)\.svg',
-			mobj,
-		)
+			mobj)
 		if mobj is not None:
 			license_terms = []
 			for license_term in mobj:
@@ -559,22 +545,19 @@ class PiaproIE(PiaproBaseInfoExtractor):
 		filesize = None
 		mobj = re.search(
 			r'<span>タイム/サイズ：</span>(?P<duration>[0-9:]+)/\((?P<filesize>[0-9,]+KB)\）',
-			webpage,
-		)
+			webpage)
 		if mobj is not None:
 			duration = mobj.group('duration')
 			filesize = mobj.group('filesize')
 		mobj = re.search(
 			r'<span>サイズ：</span>(?P<dimensions>[0-9:]+)\（(?P<filesize>[0-9,]+KB)\）',
-			webpage,
-		)
+			webpage)
 		if mobj is not None:
 			dimensions = mobj.group('duration') # unused
 			filesize = mobj.group('filesize')
 		mobj = re.search(
 			r'<span>サイズ/拡張子：</span>(?P<filesize>[0-9,]+KB)/(?P<ext>.+)形式ファイル',
-			webpage,
-		)
+			webpage)
 		if mobj is not None:
 			filesize = mobj.group('filesize')
 			ext = mobj.group('ext')
@@ -584,27 +567,23 @@ class PiaproIE(PiaproBaseInfoExtractor):
 			r'<span>閲覧数：</span>([0-9,]+)',
 			webpage,
 			'view_count',
-			fatal = False,
-		)
+			fatal = False)
 		like_count = self._html_search_regex(
 			r'<span id="spanBookmarkCount">([0-9]+)</span>',
 			webpage,
 			'like_count',
-			fatal = False,
-		)
+			fatal = False)
 		comment_count = self._html_search_regex(
 			r'作品へのコメント<span>([0-9]+)</span>',
 			webpage,
 			'comment_count',
-			fatal = False,
-		)
+			fatal = False)
 		tags = self._html_search_regex(
 			r'<ul class="taglist">(.*?)</ul>',
 			webpage,
 			'tags',
 			flags = re.DOTALL,
-			fatal = False,
-		)
+			fatal = False)
 		tags = re.split(r'\t+', tags)
 		if tags[-1] == '[編集]':
 			tags.pop()
@@ -620,16 +599,14 @@ class PiaproIE(PiaproBaseInfoExtractor):
 			else:
 				mobj = re.findall(
 					r'<img id="bigJacket_1" src="([^"]+)"',
-					webpage,
-				)
+					webpage)
 				if mobj is not None:
 					for url in mobj:
 						thumbnail_id = self._search_regex(
 							r'[a-z0-9]{16}',
 							url,
 							'thumbnail_id',
-							fatal = False,
-						)
+							fatal = False)
 						thumbnails.append(
 							{
 								'id': thumbnail_id,
@@ -665,8 +642,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 						r'<div class="illust-whole">\s*<img src="([^"]+)"',
 						webpage,
 						'url',
-						flags = re.DOTALL,
-					),
+						flags = re.DOTALL),
 					'format_id': 'cdn',
 					'quality': -1,
 				}
@@ -675,8 +651,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 			download_token = self._html_search_regex(
 				r'name="(?:DownloadOnly|DownloadWithBookmark)\[_token\]"[^>]+value="([^"]+)"',
 				webpage,
-				'download_token',
-			)
+				'download_token')
 			form_data = {
 				'DownloadOnly[contentId]': content_id,
 				'DownloadOnly[createDate]': create_date,
@@ -687,8 +662,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 				'https://piapro.jp/download/content/',
 				content_id + '_' + create_date,
 				data = urlencode_postdata(form_data),
-				note = 'Requesting final URL',
-			)
+				note = 'Requesting final URL')
 			media_url = response.geturl() + '' # XXX: WTF?
 			formats.append(
 				{
@@ -729,8 +703,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 		webpage = self._download_webpage(
 			'https://piapro.jp/ex_content/history_list/' + content_id_short + '/1',
 			content_id_short,
-			note = 'Checking for past versions',
-		)
+			note = 'Checking for past versions')
 		#if '過去のバージョンは見つかりませんでした' in webpage:
 		#	return
 		mobj = re.findall(r'<td class="title"><a href="/t/([^"]+)"', webpage)
