@@ -14,7 +14,7 @@ from ..utils import (
 	parse_filesize,
 	unified_timestamp,
 	url_or_none,
-    urlencode_postdata,
+	urlencode_postdata,
 )
 
 
@@ -436,7 +436,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 			},
 		},
 		{
-            'only_matching': True,
+			'only_matching': True,
 			'url': 'http://piapro.jp/a/content/?id=qj6lvuictzc8lp1q',
 		},
 	]
@@ -832,7 +832,7 @@ class PiaproUserIE(PiaproBaseInfoExtractor):
 			'url': 'http://piapro.jp/login/',
 		},
 		{
-            'only_matching': True,
+			'only_matching': True,
 			'url': 'http://piapro.jp/login',
 		},
 	]
