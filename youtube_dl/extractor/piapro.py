@@ -620,7 +620,6 @@ class PiaproIE(PiaproBaseInfoExtractor):
 				webpage)
 			if mobj is not None:
 				for url in mobj:
-					print(url)
 					thumbnail_id = self._search_regex(
 						r'([a-z0-9]{16}_[0-9]{14})',
 						url,
