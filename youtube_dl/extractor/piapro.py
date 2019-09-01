@@ -6,6 +6,9 @@ import datetime
 
 from .common import InfoExtractor
 from ..utils import (
+	clean_html,
+	get_element_by_class,
+	get_elements_by_class,
 	int_or_none,
 	parse_duration,
 	parse_filesize,
@@ -44,45 +47,48 @@ class PiaproBaseInfoExtractor(InfoExtractor):
 	# https://piapro.jp/content_list/?pid=____&view=text
 	# https://piapro.jp/content_list/?pid=____&view=3dm
 	_MEDIA_TYPES = {
+		False: {
+			True: None,
+			'0': None,
+		},
 		'audio': {
-			None: 'オンガク',
-			0: '全て',
-			1: '音楽',
-			2: 'その他',
-			21: 'ボカロ音楽',
-			22: '音素材/その他',
-			23: 'カラオケ/インスト',
-			24: '歌ってみた',
-			25: '弾いてみた',
+			True: 'オンガク',
+			'0': '全て',
+			'1': '音楽',
+			'2': 'その他',
+			'21': 'ボカロ音楽',
+			'22': '音素材/その他',
+			'23': 'カラオケ/インスト',
+			'24': '歌ってみた',
+			'25': '弾いてみた',
 		},
 		'image': {
-			None: 'イラスト',
-			0: '全て',
-			3: 'クリプトン公式',
-			9: '他社ボカロ',
-			4: '創作ボカロ',
-			5: '素材画像',
-			6: 'その他',
+			True: 'イラスト',
+			'0': '全て',
+			'3': 'クリプトン公式',
+			'9': '他社ボカロ',
+			'4': '創作ボカロ',
+			'5': '素材画像',
+			'6': 'その他',
 		},
 		'text': {
-			None: 'テキスト',
-			0: '全て',
-			7: '歌詞',
-			10: '小説',
-			8: 'その他',
+			True: 'テキスト',
+			'0': '全て',
+			'7': '歌詞',
+			'10': '小説',
+			'8': 'その他',
 		},
 		'3dm': {
-			None: '3Dモデル',
-			11: 'クリプトン公式',
-			12: '他社ボカロ',
-			13: '創作ボカロ',
-			14: '素材データ',
-			15: 'その他',
+			True: '3Dモデル',
+			'11': 'クリプトン公式',
+			'12': '他社ボカロ',
+			'13': '創作ボカロ',
+			'14': '素材データ',
+			'15': 'その他',
 		},
 	}
 
 	def _convert_a_to_categories(self, text):
-
 		mobj = re.search(
 			r'>(.+)</a>',
 			text)
@@ -100,8 +106,15 @@ class PiaproBaseInfoExtractor(InfoExtractor):
 
 		return [cat_name, cat_sub_name]
 
-	def _convert_querystring_to_categories(self, text):
-		return []
+	def _convert_content_list_page_to_categories(self, website):
+		els = get_elements_by_class('now', website)
+		cats = []
+		for el in els:
+			text = clean_html(el)
+			if (text != '作品一覧') and (text != ''):
+				text = re.sub(r'\d+$', '', text)
+				cats.append(text)
+		return cats
 
 class PiaproIE(PiaproBaseInfoExtractor):
 	IE_NAME = 'piapro'
@@ -736,3 +749,187 @@ class PiaproIE(PiaproBaseInfoExtractor):
 				'id': content_id,
 			}
 		return media_data
+
+class PiaproUserIE(PiaproBaseInfoExtractor):
+	_VALID_URL = r'https?://piapro\.jp/(?:my_page/\?.*pid=|content_list/\?.*pid=|)(?P<id>[A-Za-z0-9_]+)'
+	_TESTS = [
+		{
+			'url': 'https://piapro.jp/namakobcg_rnd',
+			'info_dict': {
+				'id': 'namakobcg_rnd',
+				'title': '投稿作品',
+				'uploader': 'namakobcg',
+				'uploader_id': 'namakobcg_rnd',
+			},
+			'playlist_mincount': 90,
+		},
+		{
+			'note': 'Same as above',
+			'url': 'https://piapro.jp/my_page/?pid=namakobcg_rnd&view=content&order=sd',
+			'info_dict': {
+				'id': 'namakobcg_rnd',
+				'title': '投稿作品',
+				'uploader': 'namakobcg',
+				'uploader_id': 'namakobcg_rnd',
+			},
+			'playlist_mincount': 90,
+		},
+		{
+			'url': 'https://piapro.jp/content_list/?pid=Raine_3893&view=image',
+			'info_dict': {
+				'id': 'Raine_3893 image 0',
+				'title': '投稿作品 イラスト 全て',
+				'uploader': 'Ruuya',
+				'uploader_id': 'Raine_3893',
+			},
+			'playlist_mincount': 20,
+		},
+		{
+			'url': 'https://piapro.jp/content_list/?pid=Raine_3893&view=image&category_id=9&order=sd',
+			'info_dict': {
+				'id': 'Raine_3893 image 9',
+				'title': '投稿作品 イラスト 他社ボカロ',
+				'uploader': 'Ruuya',
+				'uploader_id': 'Raine_3893',
+			},
+			'playlist_mincount': 1,
+		},
+		{
+			'note': 'Horizontal page layout',
+			'url': 'https://piapro.jp/content_list/?pid=n_buna&view=audio&category_id=23&order=sd',
+			'info_dict': {
+				'id': 'n_buna audio 23',
+				'title': '投稿作品 オンガク カラオケ/インスト',
+				'uploader': 'n-buna',
+				'uploader_id': 'n_buna',
+			},
+			'playlist_mincount': 1,
+		},
+		{
+			'note': 'Horizontal page layout',
+			'url': 'https://piapro.jp/content_list/?pid=n_buna&view=text&order=sd',
+			'info_dict': {
+				'id': 'n_buna text 0',
+				'title': '投稿作品 テキスト 全て',
+				'uploader': 'n-buna',
+				'uploader_id': 'n_buna',
+			},
+			'playlist_mincount': 20,
+		},
+		{
+			'note': '',
+			'url': 'https://piapro.jp/content_list/?pid=maebari&view=3dm&category_id=11&order=sd',
+			'info_dict': {
+				'id': 'maebari 3dm 11',
+				'title': '投稿作品 3Dモデル クリプトン公式',
+				'uploader': 'maebari',
+				'uploader_id': 'maebari',
+			},
+			'playlist_mincount': 10,
+		},
+		{
+			'skip': 'Not a user page',
+			'url': 'http://piapro.jp/login/',
+		},
+		{
+            'only_matching': True,
+			'url': 'http://piapro.jp/login',
+		},
+	]
+
+	def _real_extract(self, url):
+		user_id = self._match_id(url)
+
+		if 'pid' not in url:
+			url = 'https://piapro.jp/my_page/?view=content&pid=' + user_id
+		url = re.sub(r'[?&]start_rec=\d+', '', url)
+		url = re.sub(r'[?&]order=\d+', '', url)
+		webpage = self._download_webpage(url, user_id)
+
+		uploader = self._html_search_regex(
+			r'<h2>(.+?)</h2>',
+			webpage,
+			'uploader')
+		uploader = re.sub(r'さん$', '', uploader)
+
+		#categories = self._convert_content_list_page_to_categories(webpage)
+		view = None
+		category_id = None
+		view = self._search_regex(
+			r'[?&]view=([a-z0-9]+)',
+			url,
+			'view',
+			fatal = False,
+			default = False)
+		if view == 'content':
+			view = False
+		category_id = self._search_regex(
+			r'[?&]category_id=(\d+)',
+			url,
+			'view',
+			fatal = False,
+			default = '0')
+
+		categories = []
+		cat_name = self._MEDIA_TYPES[view][True]
+		cat_sub_name = self._MEDIA_TYPES[view][category_id]
+		if cat_name:
+			categories.append(cat_name)
+		if cat_sub_name:
+			categories.append(cat_sub_name)
+
+		playlist_id = None
+		playlist_title = None
+		playlist_id = user_id
+		if view:
+			playlist_id += ' ' + view
+			if category_id:
+				playlist_id += ' ' + category_id
+		playlist_title = '投稿作品'
+		if len(categories) > 0:
+			playlist_title += ' ' + ' '.join(categories)
+
+		webpages = {
+			0: webpage,
+		}
+		el = get_element_by_class('paging', webpage)
+		if el:
+			mobj = re.findall(r'(<li.*?</li>)', el)
+			mobj.pop(0) # "BACK"
+			mobj.pop() # "NEXT"
+			for li in mobj:
+				mobj = re.search(r'([?&]start_rec=(\d+))', li)
+				if mobj is not None:
+					query = mobj.group(1)
+					start_rec = mobj.group(2)
+					webpages[query] = self._download_webpage(
+						url + query,
+						user_id + query)
+
+		entries = []
+		for start_rec in webpages:
+			webpage = webpages[start_rec]
+			els = get_elements_by_class('i_main', webpage)
+			if not els:
+				els = get_elements_by_class('title', webpage)
+			for el in els:
+				href = self._search_regex(
+					r'href="(.+)"',
+					el,
+					'href')
+				entries.append(
+					{
+						'_type': 'url',
+						'url': 'https://piapro.jp' + href,
+						'ie_key': PiaproIE.ie_key(),
+					}
+				)
+
+		return {
+			'_type': 'playlist',
+			'id': playlist_id,
+			'title': playlist_title,
+			'uploader': uploader,
+			'uploader_id': user_id,
+			'entries': entries,
+		}
