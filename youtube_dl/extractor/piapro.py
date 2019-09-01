@@ -913,14 +913,14 @@ class PiaproUserIE(PiaproBaseInfoExtractor):
 			if not els:
 				els = get_elements_by_class('title', webpage)
 			for el in els:
-				href = self._search_regex(
-					r'href="(.+)"',
+				video_id = self._search_regex(
+					r'href="/t/([A-Za-z0-9_-]{4})"',
 					el,
 					'href')
 				entries.append(
 					{
 						'_type': 'url',
-						'url': 'https://piapro.jp' + href,
+						'url': 'https://piapro.jp/t/' + video_id,
 						'ie_key': PiaproIE.ie_key(),
 					}
 				)
