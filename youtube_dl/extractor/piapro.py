@@ -383,7 +383,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 		{
 			# test 4
 			'note': 'Text',
-			'skip': 'Needs an account',
+			'skip': 'Need to log in',
 			'url': 'https://piapro.jp/t/esIT',
 			'info_dict': {
 				'id': 'lzw1fwnk06l2b8ro_20110930071803',
@@ -416,7 +416,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 		{
 			# test 5
 			'note': '3D model',
-			#'skip': 'Needs an account',
+			'skip': 'Need to log in',
 			'url': 'https://piapro.jp/t/KPU3',
 			'info_dict': {
 				'id': 'dtuhicgnptro9jc3_20121229020229',
@@ -493,6 +493,14 @@ class PiaproIE(PiaproBaseInfoExtractor):
 			fatal = False)
 		categories = self._convert_a_to_categories(categories)
 
+		if (
+			(
+				('テキスト' in categories) or ('3Dモデル' in categories)
+			) and
+			not self.is_logged_in
+		):
+			self._downloader.report_warning('You must log in')
+
 		content_id = None
 		create_date = None
 
@@ -527,9 +535,12 @@ class PiaproIE(PiaproBaseInfoExtractor):
 				[
 					r'createDate:\s*\'([0-9]{14})\'',
 					r'name="(?:DownloadOnly|DownloadWithBookmark)\[createDate\]"[^>]+value="([0-9]{14})"',
+					r'<span>投稿日：</span>([^ ]+ [^ ]+)', # YYYY/MM/DD HH:MM:SS (last resort)
 				],
 				webpage,
 				'create_date')
+			if ' ' in create_date:
+				create_date = re.sub(r'[^\d]', '', create_date)
 
 		title = self._html_search_regex(
 			r'<h1[^>]+>(.+?)</h1>',
