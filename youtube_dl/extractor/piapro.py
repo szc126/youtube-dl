@@ -8,7 +8,7 @@ from .common import InfoExtractor
 from ..utils import (
 	clean_html,
 	get_element_by_class,
-	get_elements_by_class,
+	get_elements_by_class, # TODO: use this more, instead of _html_search_regex
 	int_or_none,
 	parse_duration,
 	parse_filesize,
@@ -168,7 +168,8 @@ class PiaproIE(PiaproBaseInfoExtractor):
 				'categories': ['オンガク', '音楽'],
 				'tags': [ # freely editable by users
 					'初音ミク', '桜ノ雨', 'ｈａｌｙｏｓｙ', '卒業',
-					'卒業ソング', '桜', '春', '思い出', '前向き', '名曲'],
+					'卒業ソング', '桜', '春', '思い出', '前向き', '名曲'
+				],
 			},
 			'params': {
 				#'skip_download': True,
@@ -765,6 +766,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 				'entries': entries,
 				'id': content_id,
 			}
+
 		return media_data
 
 class PiaproUserIE(PiaproBaseInfoExtractor):
