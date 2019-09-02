@@ -118,6 +118,7 @@ class PiaproBaseInfoExtractor(InfoExtractor):
 
 class PiaproIE(PiaproBaseInfoExtractor):
 	IE_NAME = 'piapro'
+	IE_DESC = 'piapro(ピアプロ)'
 	_NETRC_MACHINE = 'piapro'
 	_VALID_URL = r'https?://piapro\.jp/(?:a/content/\?id=|content\/|t/)(?P<id>[A-Za-z0-9]{16}|[A-Za-z0-9_-]{4}/[0-9]{14}|[A-Za-z0-9_-]{4})'
 	_TESTS = [
