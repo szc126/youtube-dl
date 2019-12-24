@@ -840,6 +840,7 @@ from .photobucket import PhotobucketIE
 from .piapro import (
     PiaproIE,
     PiaproUserIE,
+    PiaproCollaboIE,
 )
 from .picarto import (
     PicartoIE,
