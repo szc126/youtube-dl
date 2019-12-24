@@ -1125,3 +1125,46 @@ class PiaproUserIE(PiaproBaseInfoExtractor):
 			'uploader_id': user_id,
 			'entries': entries,
 		}
+
+class PiaproCollaboIE(InfoExtractor):
+	_VALID_URL = r'https?://piapro\.jp/(?:collabo/\?view=collabo&id=|content_list/\?.*collabo_id=)(?P<id>[A-Za-z0-9_]+)'
+	_TESTS = [
+		{
+			'url': 'https://piapro.jp/collabo/?id=12426',
+			'info_dict': {
+				'id': '12426',
+				'title': '投稿作品',
+				'uploader': 'ボカロ使いの酒場◆絵◇動画担当重点募集◆～ツールを使いこなして創作に活かそう～',
+			},
+			'playlist_mincount': 3100,
+		},
+		{
+			'url': 'https://piapro.jp/collabo/?view=content&id=12426&order=sd',
+			'info_dict': {
+				'id': '12426',
+				'title': '投稿作品',
+				'uploader': 'ボカロ使いの酒場◆絵◇動画担当重点募集◆～ツールを使いこなして創作に活かそう～',
+			},
+			'playlist_mincount': 3100,
+		},
+		{
+			'note': 'Just illustrations',
+			'url': 'https://piapro.jp/content_list/?view=image&collabo_id=12426',
+			'info_dict': {
+				'id': '12426',
+				'title': '投稿作品_イラスト',
+				'uploader': 'ボカロ使いの酒場◆絵◇動画担当重点募集◆～ツールを使いこなして創作に活かそう～',
+			},
+			'playlist_mincount': 1400,
+		},
+		{
+			'note': 'Just music > karaoke and instrumentals',
+			'url': 'https://piapro.jp/content_list/?view=audio&collabo_id=12426&category_id=23&order=sd',
+			'info_dict': {
+				'id': '12426',
+				'title': '投稿作品_オンガク_カラオケ/インスト',
+				'uploader': 'ボカロ使いの酒場◆絵◇動画担当重点募集◆～ツールを使いこなして創作に活かそう～',
+			},
+			'playlist_mincount': 1,
+		},
+	]
