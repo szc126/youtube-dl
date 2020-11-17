@@ -879,6 +879,10 @@ class PiaproIE(PiaproBaseInfoExtractor):
 				}
 			)
 
+		# XXX
+		import hashlib
+		print(hashlib.md5(description.encode("utf8")).hexdigest())
+
 		return {
 			'id': content_id + '_' + create_date,
 			'title': title,
@@ -904,7 +908,7 @@ class PiaproIE(PiaproBaseInfoExtractor):
 			'tags': tags,
 		}
 
-	def _get_past_versions(self, content_id_short):
+	def _get_past_version_ids(self, content_id_short):
 		webpage = self._download_webpage(
 			'https://piapro.jp/ex_content/history_list/' + content_id_short + '/1',
 			content_id_short,
@@ -918,14 +922,34 @@ class PiaproIE(PiaproBaseInfoExtractor):
 
 	def _real_extract(self, url):
 		video_id = self._match_id(url)
+		video_id = re.sub(r'/[0-9]{14}', '', video_id) # remove create_date. we will download all versions
+
 		webpage = self._download_webpage(url, video_id)
 
 		media_data = self._get_media_data(url, webpage)
 		content_id_short = media_data['display_id']
-		content_id = media_data['alt_title']
+
+		associated_ids = []
+		for thumbnail in media_data['thumbnails']:
+			if 'id' in thumbnail:
+				associated_ids.append(
+					re.sub(
+						r'_.+', # remove create_date
+						'',
+						thumbnail['id']
+					)
+				)
+
+		if 'lyric-box-txt' in webpage:
+			el = get_element_by_class('lyric-option', webpage)
+			lyrics_video_id = self._search_regex(
+				r'/t/([A-Za-z0-9_-]{4})',
+				el,
+				'lyrics_video_id')
+			associated_ids.append(lyrics_video_id)
 
 		if 'すべてのバージョンを表示' in webpage:
-			past_versions = self._get_past_versions(content_id_short)
+			past_versions = self._get_past_version_ids(content_id_short)
 			entries = []
 			for past_version in past_versions:
 				# TODO: one of these has been downloaded before.
